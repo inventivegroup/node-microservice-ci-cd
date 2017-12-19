@@ -6,6 +6,8 @@ LABEL maintainer="Inventive Group Inc."
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
+COPY ./src /usr/src/app/src
+
 # Install app dependencies
 COPY package.json /usr/src/app/
 RUN npm install --production
