@@ -1,0 +1,121 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+
+  "Description": "Provision resource dependencies for the app (e.g., RDS, S3, DynamoDB, etc..).",
+
+  "Parameters": {
+    "DatabaseUser": {
+      "Default": "admin",
+      "NoEcho": "true",
+      "Type": "String",
+      "Description": "Database admin account name",
+      "MinLength": "1",
+      "MaxLength": "16",
+      "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+      "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters."
+    },
+    "DatabasePassword": {
+      "Default": "0bee082a464",
+      "NoEcho": "true",
+      "Type": "String",
+      "Description": "Database admin account password",
+      "MinLength": "1",
+      "MaxLength": "41",
+      "AllowedPattern": "[a-zA-Z0-9]*",
+      "ConstraintDescription": "must contain only alphanumeric characters."
+    },
+    "RemoteDBAccessSource": {
+      "Description": "CIDR range from which remote database connections will be allows (for local dev)",
+      "Type": "String",
+      "MinLength": "9",
+      "MaxLength": "18",
+      "Default": "1.1.1.1/1",
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "must be a valid CIDR range of the form x.x.x.x/x."
+    },
+    "DBInstanceType": {
+      "Description": "The Key Pair to launch instances with",
+      "Type": "String",
+      "Default": "db.t1.micro",
+      "AllowedValues": ["db.t1.micro", "db.m1.small", "db.m1.medium", "db.m1.large"]
+    },
+    "ApplicationName": {
+      "Description": "The name of the Elastic Beanstalk Application",
+      "Type": "String",
+      "Default": "inventive-default-app"
+    }  
+  },
+  "Conditions" : {
+    "RemoteDBAccess" : { "Fn::Not" : [{ "Fn::Equals" : [ { "Ref" : "RemoteDBAccessSource" }, "1.1.1.1/1" ]}]}
+  },
+  "Resources": {
+    "InstanceSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "RDS allows ingress from EC2 instances in this group.",
+        "SecurityGroupIngress": []
+      }
+    },
+    
+    "AppBucket": {
+      "Type": "AWS::S3::Bucket"
+    },
+
+    "DBSecurityGroup": {
+      "Type": "AWS::RDS::DBSecurityGroup",
+      "Properties": {
+        "DBSecurityGroupIngress": [
+          {"EC2SecurityGroupName": { "Ref": "InstanceSecurityGroup" }}
+        ],
+        "GroupDescription": "Database access"
+      }
+    },
+
+    "DBSecurityGroupRemoteAccess" : {
+      "Type": "AWS::RDS::DBSecurityGroupIngress", 
+      "Condition": "RemoteDBAccess",
+      "Properties": {
+        "DBSecurityGroupName": {"Ref": "DBSecurityGroup"},
+        "CIDRIP": { "Ref": "RemoteDBAccessSource" }
+      }
+    },
+
+    "Database": {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "Engine": "MySQL",
+        "DBName": {
+          "Ref": "ApplicationName"
+        },
+        "MasterUsername": {
+          "Ref": "DatabaseUser"
+        },
+        "DBInstanceClass": { "Ref": "DBInstanceType" },
+        "DBSecurityGroups": [{
+          "Ref": "DBSecurityGroup"
+        }],
+        "AllocatedStorage": "5",
+        "MasterUserPassword": {
+          "Ref": "DatabasePassword"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "InstanceSecurityGroup": {
+      "Value": {"Ref": "InstanceSecurityGroup"}
+    },
+    "RdsDbId": {
+       "Value" : { "Ref" : "Database" }
+    },
+    "AppBucket": {
+      "Value": { "Ref" : "AppBucket"}
+    },
+    "DatabaseUser":{
+      "Value": { "Ref" : "DatabaseUser"}
+    },
+    "DatabasePassword": {
+      "Value": { "Ref" : "DatabasePassword" }
+    }
+  }
+}
