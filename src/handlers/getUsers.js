@@ -1,5 +1,7 @@
 module.exports = (req, res, next) => {
-  res.send([]);
+  res.send([{
+    name: 'Joe Schmo',
+  }]);
 
   next();
 };
