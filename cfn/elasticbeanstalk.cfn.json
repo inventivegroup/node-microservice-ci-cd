@@ -24,9 +24,6 @@
     "WarKey": {
       "Type": "String"
     },
-    "KeyName": {
-      "Type": "String"
-    },
     "InstanceType": {
       "Type": "String"
     },
@@ -77,12 +74,6 @@
             "OptionName": "AMM_AWS_REGION",
             "Value": {
               "Ref": "AWS::Region"
-            }
-          }, {
-            "Namespace": "aws:autoscaling:launchconfiguration",
-            "OptionName": "EC2KeyName",
-            "Value": {
-               "Ref" : "KeyName"
             }
           }, {
             "Namespace": "aws:autoscaling:launchconfiguration",

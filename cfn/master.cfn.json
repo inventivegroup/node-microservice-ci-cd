@@ -53,10 +53,6 @@
       "Type": "String",
       "Default": "public/classic/elasticbeanstalk.cfn.json"
     },
-    "KeyName": {
-      "Description": "The Key Pair to launch instances with",
-      "Type": "String"
-    },
     "InstanceType": {
       "Description": "The Key Pair to launch instances with",
       "Type": "String",
@@ -102,7 +98,6 @@
           "DatabasePassword"       : { "Ref" : "DatabasePassword" },
           "AssetsBucketPrefix"     : { "Ref" : "AssetsBucketPrefix" },
           "WarKey"                 : { "Ref" : "WarKey"},
-          "KeyName"                : { "Ref" : "KeyName" },
           "InstanceType"           : { "Ref" : "InstanceType"},
           "ApplicationName"        : { "Ref" : "ApplicationName" }
         }
