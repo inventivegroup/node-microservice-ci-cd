@@ -59,6 +59,9 @@
       "Default": "inventive-default-app"
     }
   },
+  "Conditions" : {
+    "RemoteDBAccess" : { "Fn::Not" : [{ "Fn::Equals" : [ { "Ref" : "RemoteDBAccessSource" }, "1.1.1.1/1" ]}]}
+  },
   "Resources": {
     "InstanceSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
