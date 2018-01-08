@@ -57,6 +57,10 @@
       "Description": "The name of the Elastic Beanstalk Application",
       "Type": "String",
       "Default": "inventive-default-app"
+    },
+    "EnvironmentName": {
+      "Type": "String",
+      "Default": "Development"
     }
   },
   "Conditions" : {
@@ -119,7 +123,7 @@
         "Description": {
           "Ref": "ApplicationName"
         },
-        "ApplicationName" : { "Fn::Join" : ["-", [{ "Ref": "ApplicationName" }, {"Ref": "DeveloperName"}]] },
+        "ApplicationName" : { "Ref": "ApplicationName" },
         "ConfigurationTemplates": [{
           "TemplateName": "DefaultConfiguration",
           "Description": "Default Configuration Version 1.0 - with SSH access",
@@ -182,7 +186,7 @@
       "Type": "AWS::ElasticBeanstalk::Environment",
       "Properties": {
         "ApplicationName": { "Ref": "Application"},
-        "EnvironmentName" : { "Fn::Join" : ["-", [ { "Ref": "EnvironmentName" }, {"Ref": "DeveloperName"}]] },
+        "EnvironmentName" : { "Ref": "EnvironmentName" },
         "Description": "Default Environment",
         "VersionLabel": "Initial Version",
         "TemplateName": "DefaultConfiguration",
@@ -190,7 +194,7 @@
           "Namespace": "aws:elasticbeanstalk:application:environment",
           "OptionName": "RDS_INSTANCEID",
           "Value": {
-            "Ref": "RdsDbId"
+            "Ref": "Database"
           }
         },{
           "Namespace": "aws:elasticbeanstalk:application:environment",
