@@ -33,14 +33,6 @@
       "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
       "ConstraintDescription": "must be a valid CIDR range of the form x.x.x.x/x."
     },
-    "AppResourcesTemplateURL": {
-      "Description": "The URL of the template for the resources required to run the app",
-      "Type": "String"
-    },
-    "AppTemplateURL": {
-      "Description": "The URL of the template for the EB app/env substack",
-      "Type": "String"
-    },
     "InstanceType": {
       "Description": "The Key Pair to launch instances with",
       "Type": "String",
@@ -59,6 +51,13 @@
       "Default": "inventive-default-app"
     },
     "EnvironmentName": {
+      "Type": "String",
+      "Default": "Development"
+    },
+    "SourceBundleS3Bucket": {
+      "Type": "String"
+    },
+    "SourceBundleS3Key": {
       "Type": "String",
       "Default": "Development"
     }
