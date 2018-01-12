@@ -79,6 +79,7 @@
     "DBEC2SecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties" : {
+        "GroupName": "test",
         "GroupDescription": "Open database for access",
         "SecurityGroupIngress" : [{
           "IpProtocol" : "tcp",
