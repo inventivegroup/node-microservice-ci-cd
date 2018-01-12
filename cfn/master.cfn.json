@@ -76,21 +76,16 @@
     "AppBucket": {
       "Type": "AWS::S3::Bucket"
     },
-    "DBSecurityGroup": {
-      "Type": "AWS::RDS::DBSecurityGroup",
-      "Properties": {
-        "DBSecurityGroupIngress": [
-          {"EC2SecurityGroupName": { "Ref": "InstanceSecurityGroup" }}
-        ],
-        "GroupDescription": "Database access"
-      }
-    },
-    "DBSecurityGroupRemoteAccess" : {
-      "Type": "AWS::RDS::DBSecurityGroupIngress", 
-      "Condition": "RemoteDBAccess",
-      "Properties": {
-        "DBSecurityGroupName": {"Ref": "DBSecurityGroup"},
-        "CIDRIP": { "Ref": "RemoteDBAccessSource" }
+    "DBEC2SecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "GroupDescription": "Open database for access",
+        "SecurityGroupIngress" : [{
+          "IpProtocol" : "tcp",
+          "FromPort" : "3306",
+          "ToPort" : "3306",
+          "SourceSecurityGroupName" : { "Ref" : "InstanceSecurityGroup" }
+        }]
       }
     },
     "Database": {
@@ -104,16 +99,14 @@
           "Ref": "DatabaseUser"
         },
         "DBInstanceClass": { "Ref": "DBInstanceType" },
-        "DBSecurityGroups": [{
-          "Ref": "DBSecurityGroup"
-        }],
+        "VPCSecurityGroups" : [ { "Ref": "DBEC2SecurityGroup"  } ],
         "AllocatedStorage": "5",
         "MasterUserPassword": {
           "Ref": "DatabasePassword"
-        }
+        },
+        "Tags" : [ {"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } ]
       }
     },
-
 
 
     "Application": {
