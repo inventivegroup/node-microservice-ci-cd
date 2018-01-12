@@ -204,21 +204,22 @@
               }
             ]
           }
-        ],
-        "ApplicationVersions": [
-          {
-            "VersionLabel": "Initial Version",
-            "Description": "Initial Version",
-            "SourceBundle": {
-              "S3Bucket": {
-                "Ref": "SourceBundleS3Bucket"
-              },
-              "S3Key": {
-                "Ref": "SourceBundleS3Key"
-              }
-            }
-          }
         ]
+      }
+    },
+    "ApplicationVersion" :{ 
+      "Type" : "AWS::ElasticBeanstalk::ApplicationVersion",
+      "Properties" : {
+        "ApplicationName" : {"Ref" : "Application"},
+        "Description" : "my sample version",
+        "SourceBundle": {
+          "S3Bucket": {
+            "Ref": "SourceBundleS3Bucket"
+          },
+          "S3Key": {
+            "Ref": "SourceBundleS3Key"
+          }
+        }
       }
     },
     "Environment": {
