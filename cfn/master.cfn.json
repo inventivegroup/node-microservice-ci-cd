@@ -1,8 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-
   "Description": "Parent template to provision resource dependencies and launch the App on AWS Elastic Beanstalk.",
-
   "Parameters": {
     "DatabaseUser": {
       "Default": "admin",
@@ -37,13 +35,23 @@
       "Description": "The Key Pair to launch instances with",
       "Type": "String",
       "Default": "t1.micro",
-      "AllowedValues": ["t1.micro", "m1.small", "m1.medium", "m1.large"]
+      "AllowedValues": [
+        "t1.micro",
+        "m1.small",
+        "m1.medium",
+        "m1.large"
+      ]
     },
     "DBInstanceType": {
       "Description": "The Key Pair to launch instances with",
       "Type": "String",
       "Default": "db.t2.micro",
-      "AllowedValues": ["db.t2.micro", "db.m1.small", "db.m1.medium", "db.m1.large"]
+      "AllowedValues": [
+        "db.t2.micro",
+        "db.m1.small",
+        "db.m1.medium",
+        "db.m1.large"
+      ]
     },
     "ApplicationName": {
       "Description": "The name of the Elastic Beanstalk Application",
@@ -62,8 +70,19 @@
       "Default": "Development"
     }
   },
-  "Conditions" : {
-    "RemoteDBAccess" : { "Fn::Not" : [{ "Fn::Equals" : [ { "Ref" : "RemoteDBAccessSource" }, "1.1.1.1/1" ]}]}
+  "Conditions": {
+    "RemoteDBAccess": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "RemoteDBAccessSource"
+            },
+            "1.1.1.1/1"
+          ]
+        }
+      ]
+    }
   },
   "Resources": {
     "InstanceSecurityGroup": {
@@ -78,15 +97,20 @@
     },
     "DBEC2SecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
-      "Properties" : {
-        "GroupName": "test",
+      "Properties": {
         "GroupDescription": "Open database for access",
-        "SecurityGroupIngress" : [{
-          "IpProtocol" : "tcp",
-          "FromPort" : "3306",
-          "ToPort" : "3306",
-          "SourceSecurityGroupName" : { "Ref" : "InstanceSecurityGroup" }
-        }]
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "3306",
+            "ToPort": "3306",
+            "VPCSecurityGroups": [
+              {
+                "Fn::GetAtt": ["DBEC2SecurityGroup", "GroupId"]
+              }
+            ]
+          }
+        ]
       }
     },
     "Database": {
@@ -99,132 +123,174 @@
         "MasterUsername": {
           "Ref": "DatabaseUser"
         },
-        "DBInstanceClass": { "Ref": "DBInstanceType" },
-        "VPCSecurityGroups" : [ { "Ref": "DBEC2SecurityGroup"  } ],
+        "DBInstanceClass": {
+          "Ref": "DBInstanceType"
+        },
+        "VPCSecurityGroups": [
+          {
+            "Ref": "DBEC2SecurityGroup"
+          }
+        ],
         "AllocatedStorage": "5",
         "MasterUserPassword": {
           "Ref": "DatabasePassword"
         },
-        "Tags" : [ {"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } ]
+        "Tags": [
+          {
+            "Key": "Application",
+            "Value": {
+              "Ref": "AWS::StackId"
+            }
+          }
+        ]
       }
     },
-
-
     "Application": {
       "Type": "AWS::ElasticBeanstalk::Application",
       "Properties": {
         "Description": {
           "Ref": "ApplicationName"
         },
-        "ApplicationName" : { "Ref": "ApplicationName" },
-        "ConfigurationTemplates": [{
-          "TemplateName": "DefaultConfiguration",
-          "Description": "Default Configuration Version 1.0 - with SSH access",
-          "SolutionStackName": "64bit Amazon Linux running Tomcat 7",
-          "OptionSettings": [{
-            "Namespace": "aws:elasticbeanstalk:application:environment",
-            "OptionName": "S3_CONFIG_BUCKET",
-            "Value": {
-              "Ref": "AppBucket"
-            }
-          }, {
-            "Namespace": "aws:elasticbeanstalk:application:environment",
-            "OptionName": "S3_CONFIG_KEY",
-            "Value": {
-              "Fn::Join": ["", ["config/env/", {
-                "Ref": "AWS::StackName"
-              }, ".properties"]]
-            }
-          }, {
-            "Namespace": "aws:elasticbeanstalk:application:environment",
-            "OptionName": "AMM_AWS_REGION",
-            "Value": {
-              "Ref": "AWS::Region"
-            }
-          }, {
-            "Namespace": "aws:autoscaling:launchconfiguration",
-            "OptionName": "IamInstanceProfile",
-            "Value": {
-              "Ref": "EbAppInstanceProfile"
-            }
-          }, {
-            "Namespace": "aws:autoscaling:launchconfiguration",
-            "OptionName": "InstanceType",
-            "Value": {
-              "Ref": "InstanceType"
-            }
-          }, {
-            "Namespace": "aws:autoscaling:launchconfiguration",
-            "OptionName": "SecurityGroups",
-            "Value": {
-              "Ref": "InstanceSecurityGroup"
-            }
-          }]
-        }],
-        "ApplicationVersions": [{
-          "VersionLabel": "Initial Version",
-          "Description": "Initial Version",
-          "SourceBundle": {
-            "S3Bucket": {
-              "Ref": "SourceBundleS3Bucket"
-            },
-            "S3Key": {
-              "Ref": "SourceBundleS3Key"
+        "ApplicationName": {
+          "Ref": "ApplicationName"
+        },
+        "ConfigurationTemplates": [
+          {
+            "TemplateName": "DefaultConfiguration",
+            "Description": "Default Configuration Version 1.0 - with SSH access",
+            "SolutionStackName": "64bit Amazon Linux running Tomcat 7",
+            "OptionSettings": [
+              {
+                "Namespace": "aws:elasticbeanstalk:application:environment",
+                "OptionName": "S3_CONFIG_BUCKET",
+                "Value": {
+                  "Ref": "AppBucket"
+                }
+              },
+              {
+                "Namespace": "aws:elasticbeanstalk:application:environment",
+                "OptionName": "S3_CONFIG_KEY",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "config/env/",
+                      {
+                        "Ref": "AWS::StackName"
+                      },
+                      ".properties"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Namespace": "aws:elasticbeanstalk:application:environment",
+                "OptionName": "AMM_AWS_REGION",
+                "Value": {
+                  "Ref": "AWS::Region"
+                }
+              },
+              {
+                "Namespace": "aws:autoscaling:launchconfiguration",
+                "OptionName": "IamInstanceProfile",
+                "Value": {
+                  "Ref": "EbAppInstanceProfile"
+                }
+              },
+              {
+                "Namespace": "aws:autoscaling:launchconfiguration",
+                "OptionName": "InstanceType",
+                "Value": {
+                  "Ref": "InstanceType"
+                }
+              },
+              {
+                "Namespace": "aws:autoscaling:launchconfiguration",
+                "OptionName": "SecurityGroups",
+                "Value": {
+                  "Ref": "InstanceSecurityGroup"
+                }
+              }
+            ]
+          }
+        ],
+        "ApplicationVersions": [
+          {
+            "VersionLabel": "Initial Version",
+            "Description": "Initial Version",
+            "SourceBundle": {
+              "S3Bucket": {
+                "Ref": "SourceBundleS3Bucket"
+              },
+              "S3Key": {
+                "Ref": "SourceBundleS3Key"
+              }
             }
           }
-        }]
+        ]
       }
     },
     "Environment": {
       "Type": "AWS::ElasticBeanstalk::Environment",
       "Properties": {
-        "ApplicationName": { "Ref": "Application"},
-        "EnvironmentName" : { "Ref": "EnvironmentName" },
+        "ApplicationName": {
+          "Ref": "Application"
+        },
+        "EnvironmentName": {
+          "Ref": "EnvironmentName"
+        },
         "Description": "Default Environment",
         "VersionLabel": "Initial Version",
         "TemplateName": "DefaultConfiguration",
-        "OptionSettings": [{
-          "Namespace": "aws:elasticbeanstalk:application:environment",
-          "OptionName": "RDS_INSTANCEID",
-          "Value": {
-            "Ref": "Database"
+        "OptionSettings": [
+          {
+            "Namespace": "aws:elasticbeanstalk:application:environment",
+            "OptionName": "RDS_INSTANCEID",
+            "Value": {
+              "Ref": "Database"
+            }
+          },
+          {
+            "Namespace": "aws:elasticbeanstalk:application:environment",
+            "OptionName": "RDS_DATABASE",
+            "Value": {
+              "Ref": "ApplicationName"
+            }
+          },
+          {
+            "Namespace": "aws:elasticbeanstalk:application:environment",
+            "OptionName": "RDS_USERNAME",
+            "Value": {
+              "Ref": "DatabaseUser"
+            }
+          },
+          {
+            "Namespace": "aws:elasticbeanstalk:application:environment",
+            "OptionName": "RDS_PASSWORD",
+            "Value": {
+              "Ref": "DatabasePassword"
+            }
           }
-        },{
-          "Namespace": "aws:elasticbeanstalk:application:environment",
-          "OptionName": "RDS_DATABASE",
-          "Value": {
-            "Ref": "ApplicationName"
-          }
-        }, {
-          "Namespace": "aws:elasticbeanstalk:application:environment",
-          "OptionName": "RDS_USERNAME",
-          "Value": {
-            "Ref": "DatabaseUser"
-          }
-        }, {
-          "Namespace": "aws:elasticbeanstalk:application:environment",
-          "OptionName": "RDS_PASSWORD",
-          "Value": {
-            "Ref": "DatabasePassword"
-          }
-        }]
+        ]
       }
     },
     "EbAppRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
-          "Statement": [{
-            "Effect": "Allow",
-            "Principal": {
-              "Service": [
-                "ec2.amazonaws.com"
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
               ]
-            },
-            "Action": [
-              "sts:AssumeRole"
-            ]
-          }]
+            }
+          ]
         },
         "Path": "/"
       }
@@ -234,24 +300,30 @@
       "Properties": {
         "PolicyName": "EbApp",
         "PolicyDocument": {
-          "Statement": [{
-            "Effect": "Allow",
-            "Action": "*",
-            "Resource": "*"
-          }]
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": "*",
+              "Resource": "*"
+            }
+          ]
         },
-        "Roles": [{
-          "Ref": "EbAppRole"
-        }]
+        "Roles": [
+          {
+            "Ref": "EbAppRole"
+          }
+        ]
       }
     },
     "EbAppInstanceProfile": {
       "Type": "AWS::IAM::InstanceProfile",
       "Properties": {
         "Path": "/",
-        "Roles": [{
-          "Ref": "EbAppRole"
-        }]
+        "Roles": [
+          {
+            "Ref": "EbAppRole"
+          }
+        ]
       }
     }
   },
@@ -259,9 +331,18 @@
     "URL": {
       "Description": "URL of the AWS Elastic Beanstalk Environment",
       "Value": {
-        "Fn::Join": ["", ["http://", {
-          "Fn::GetAtt": ["Environment", "EndpointURL"]
-        }]]
+        "Fn::Join": [
+          "",
+          [
+            "http://",
+            {
+              "Fn::GetAtt": [
+                "Environment",
+                "EndpointURL"
+              ]
+            }
+          ]
+        ]
       }
     }
   }
