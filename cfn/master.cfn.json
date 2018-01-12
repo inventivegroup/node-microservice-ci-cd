@@ -35,7 +35,13 @@
       "Description": "The Key Pair to launch instances with",
       "Type": "String",
       "Default": "t2.micro",
-      "AllowedValues": ["t2.nano", "t2.micro", "t2.small", "t2.medium", "t2.large"]
+      "AllowedValues": [
+        "t2.nano",
+        "t2.micro",
+        "t2.small",
+        "t2.medium",
+        "t2.large"
+      ]
     },
     "DBInstanceType": {
       "Description": "The Key Pair to launch instances with",
@@ -99,7 +105,12 @@
             "IpProtocol": "tcp",
             "FromPort": "3306",
             "ToPort": "3306",
-            "SourceSecurityGroupId": { "Fn::GetAtt": ["InstanceSecurityGroup", "GroupId"] }            
+            "SourceSecurityGroupId": {
+              "Fn::GetAtt": [
+                "InstanceSecurityGroup",
+                "GroupId"
+              ]
+            }
           }
         ]
       }
@@ -119,7 +130,10 @@
         },
         "VPCSecurityGroups": [
           {
-            "Fn::GetAtt": ["DBEC2SecurityGroup", "GroupId"]
+            "Fn::GetAtt": [
+              "DBEC2SecurityGroup",
+              "GroupId"
+            ]
           }
         ],
         "AllocatedStorage": "5",
@@ -207,11 +221,13 @@
         ]
       }
     },
-    "ApplicationVersion" :{ 
-      "Type" : "AWS::ElasticBeanstalk::ApplicationVersion",
-      "Properties" : {
-        "ApplicationName" : {"Ref" : "Application"},
-        "Description" : "my sample version",
+    "ApplicationVersion": {
+      "Type": "AWS::ElasticBeanstalk::ApplicationVersion",
+      "Properties": {
+        "ApplicationName": {
+          "Ref": "Application"
+        },
+        "Description": "my sample version",
         "SourceBundle": {
           "S3Bucket": {
             "Ref": "SourceBundleS3Bucket"
@@ -232,7 +248,9 @@
           "Ref": "EnvironmentName"
         },
         "Description": "Default Environment",
-        "VersionLabel": "Initial Version",
+        "VersionLabel": {
+          "Ref": "ApplicationVersion"
+        },
         "TemplateName": "DefaultConfiguration",
         "OptionSettings": [
           {
