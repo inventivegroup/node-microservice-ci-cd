@@ -42,8 +42,8 @@
     "DBInstanceType": {
       "Description": "The Key Pair to launch instances with",
       "Type": "String",
-      "Default": "db.t1.micro",
-      "AllowedValues": ["db.t1.micro", "db.m1.small", "db.m1.medium", "db.m1.large"]
+      "Default": "db.t2.micro",
+      "AllowedValues": ["db.t2.micro", "db.m1.small", "db.m1.medium", "db.m1.large"]
     },
     "ApplicationName": {
       "Description": "The name of the Elastic Beanstalk Application",
