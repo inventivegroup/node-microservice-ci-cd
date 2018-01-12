@@ -34,13 +34,8 @@
     "InstanceType": {
       "Description": "The Key Pair to launch instances with",
       "Type": "String",
-      "Default": "t1.micro",
-      "AllowedValues": [
-        "t1.micro",
-        "m1.small",
-        "m1.medium",
-        "m1.large"
-      ]
+      "Default": "t2.micro",
+      "AllowedValues": ["t2.nano", "t2.micro", "t2.small", "t2.medium", "t2.large"]
     },
     "DBInstanceType": {
       "Description": "The Key Pair to launch instances with",
