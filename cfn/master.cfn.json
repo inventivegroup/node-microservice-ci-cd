@@ -106,7 +106,7 @@
             "ToPort": "3306",
             "VPCSecurityGroups": [
               {
-                "Fn::GetAtt": ["DBEC2SecurityGroup", "GroupId"]
+                "Fn::GetAtt": ["InstanceSecurityGroup", "GroupId"]
               }
             ]
           }
@@ -128,7 +128,7 @@
         },
         "VPCSecurityGroups": [
           {
-            "Ref": "DBEC2SecurityGroup"
+            "Fn::GetAtt": ["DBEC2SecurityGroup", "GroupId"]
           }
         ],
         "AllocatedStorage": "5",
