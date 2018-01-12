@@ -104,11 +104,7 @@
             "IpProtocol": "tcp",
             "FromPort": "3306",
             "ToPort": "3306",
-            "VPCSecurityGroups": [
-              {
-                "Fn::GetAtt": ["InstanceSecurityGroup", "GroupId"]
-              }
-            ]
+            "SourceSecurityGroupId": { "Fn::GetAtt": ["InstanceSecurityGroup", "GroupId"] }            
           }
         ]
       }
