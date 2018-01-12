@@ -48,7 +48,7 @@
     "ApplicationName": {
       "Description": "The name of the Elastic Beanstalk Application",
       "Type": "String",
-      "Default": "inventive-default-app"
+      "Default": "inventivedefaultapp"
     },
     "EnvironmentName": {
       "Type": "String",
