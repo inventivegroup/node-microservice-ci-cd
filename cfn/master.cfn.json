@@ -154,7 +154,7 @@
           {
             "TemplateName": "DefaultConfiguration",
             "Description": "Default Configuration Version 1.0",
-            "SolutionStackName": "Single Container Docker 17.06 version 2.8.3",
+            "SolutionStackName": "64bit Amazon Linux 2017.09 v2.8.3 running Docker 17.06.2-ce",
             "OptionSettings": [
               {
                 "Namespace": "aws:elasticbeanstalk:application:environment",
