@@ -114,7 +114,7 @@ Resources:
             ActionMode: CREATE_UPDATE
             Capabilities: CAPABILITY_IAM
             RoleArn: !Sub '${CloudFormationRole.Arn}'
-            StackName: 'aftp-pipeline'
+            StackName: !Ref ApplicationName
             TemplatePath: 'Zip::infrastructure/pipeline.yaml'
             ParameterOverrides: !Sub '{"GitHubUserName": "${GitHubUserName}", "GitHubOAuthToken": "${GitHubOAuthToken}"}'
           InputArtifacts:
