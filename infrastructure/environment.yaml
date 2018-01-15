@@ -1,0 +1,45 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Environment'
+Parameters:
+  ApplicationName:
+    Type: String
+    Default: example-ci-cd
+  Stage:
+    Type: String
+    AllowedValues:
+    - prod
+    - qa
+Resources:
+  Role:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2008-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: 'ec2.amazonaws.com'
+          Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+      - 'arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier'
+  InstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Roles:
+      - !Ref Role
+  Environment:
+    Type: 'AWS::ElasticBeanstalk::Environment'
+    Properties:
+      ApplicationName: !Ref ApplicationName
+      EnvironmentName: !Sub '${ApplicationName}-${Stage}'
+      SolutionStackName: '64bit Amazon Linux 2016.09 v2.2.0 running PHP 7.0'
+      OptionSettings:
+      - Namespace: 'aws:autoscaling:launchconfiguration'
+        OptionName: 'IamInstanceProfile'
+        Value: !Ref InstanceProfile
+Outputs:
+  EnvironmentName:
+    Value: !Ref Environment
+  EndpointURL:
+    Value: !Sub '${Environment.EndpointURL}'

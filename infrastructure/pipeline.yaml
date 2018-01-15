@@ -1,0 +1,239 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Pipeline'
+Parameters:
+  ApplicationName:
+    Type: String
+    Default: node-microservice-ci-cd
+  GitHubUserName:
+    Type: String
+  GitHubOAuthToken:
+    Type: String
+    NoEcho: true
+Resources:
+  ArtifactsBucket:
+    DependsOn: CloudFormationRole
+    DeletionPolicy: Retain
+    Type: 'AWS::S3::Bucket'
+  PipelineRole:
+    DependsOn: CloudFormationRole
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - 'codepipeline.amazonaws.com'
+          Action:
+          - 'sts:AssumeRole'
+      ManagedPolicyArns:
+      - 'arn:aws:iam::aws:policy/AdministratorAccess'
+  CloudFormationRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - 'cloudformation.amazonaws.com'
+          Action:
+          - 'sts:AssumeRole'
+      ManagedPolicyArns:
+      - 'arn:aws:iam::aws:policy/AdministratorAccess'
+  CodeBuildRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - 'codebuild.amazonaws.com'
+          Action:
+          - 'sts:AssumeRole'
+      ManagedPolicyArns:
+      - 'arn:aws:iam::aws:policy/AdministratorAccess'
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    DependsOn: CloudFormationRole
+    Properties:
+      Description: Build docker image
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/docker:17.09.0
+        Type: LINUX_CONTAINER
+      Name: !Ref ApplicationName
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Source:
+        Type: CODEPIPELINE
+      TimeoutInMinutes: 5
+  Pipeline:
+    Type: 'AWS::CodePipeline::Pipeline'
+    Properties:
+      ArtifactStore:
+        Type: S3
+        Location: !Ref ArtifactsBucket
+      Name: !Ref ApplicationName
+      RestartExecutionOnUpdate: true
+      RoleArn: !Sub '${PipelineRole.Arn}'
+      Stages:
+      - Name: Source
+        Actions:
+
+        - Name: SourceAction
+          ActionTypeId:
+            Category: Source
+            Owner: ThirdParty
+            Provider: GitHub
+            Version: 1
+          Configuration:
+            Owner: !Ref GitHubUserName
+            Repo: !Ref ApplicationName
+            Branch: master
+            OAuthToken: !Ref GitHubOAuthToken
+          OutputArtifacts:
+          - Name: Zip
+          RunOrder: 1
+
+      - Name: DeployPipeline
+        Actions:
+        - Name: DeployPipelineAction
+          ActionTypeId:
+            Category: Deploy
+            Owner: AWS
+            Provider: CloudFormation
+            Version: 1
+          Configuration:
+            ActionMode: CREATE_UPDATE
+            Capabilities: CAPABILITY_IAM
+            RoleArn: !Sub '${CloudFormationRole.Arn}'
+            StackName: 'aftp-pipeline'
+            TemplatePath: 'Zip::infrastructure/pipeline.yaml'
+            ParameterOverrides: !Sub '{"GitHubUserName": "${GitHubUserName}", "GitHubOAuthToken": "${GitHubOAuthToken}"}'
+          InputArtifacts:
+          - Name: Zip
+          RunOrder: 1
+
+      - Name: Build
+        Actions:
+        - Name: BuildDockerImage
+          ActionTypeId:
+            Category: Build
+            Owner: AWS
+            Provider: CodeBuild
+            Version: 1
+          Configuration:
+            ProjectName: !Ref CodeBuildProject
+          InputArtifacts:
+          - Name: Zip
+          OutputArtifacts:
+          - Name: Build
+          RunOrder: 1
+
+      - Name: DeployApplication
+        Actions:
+        - Name: DeployApplicationAction
+          ActionTypeId:
+            Category: Deploy
+            Owner: AWS
+            Provider: CloudFormation
+            Version: 1
+          Configuration:
+            ActionMode: CREATE_UPDATE
+            Capabilities: CAPABILITY_IAM
+            RoleArn: !Sub '${CloudFormationRole.Arn}'
+            StackName: 'aftp-application'
+            TemplateConfiguration: 'Zip::infrastructure/application.input.json'
+            TemplatePath: 'Zip::infrastructure/application.yaml'
+          InputArtifacts:
+          - Name: Zip
+          RunOrder: 1
+
+      - Name: DeployQA
+        Actions:
+        - Name: DeployEnvironment
+          ActionTypeId:
+            Category: Deploy
+            Owner: AWS
+            Provider: CloudFormation
+            Version: 1
+          Configuration:
+            ActionMode: CREATE_UPDATE
+            Capabilities: CAPABILITY_IAM
+            RoleArn: !Sub '${CloudFormationRole.Arn}'
+            StackName: !Join
+              - '-'
+              - - '!Ref ApplicationName'
+                - 'qa'
+            OutputFileName: 'infrastructure/output-environment-qa.json'
+            TemplateConfiguration: 'Zip::infrastructure/environment-qa.input.json'
+            TemplatePath: 'Zip::infrastructure/environment.yaml'
+          InputArtifacts:
+          - Name: Zip
+          OutputArtifacts:
+          - Name: QA
+          RunOrder: 1
+
+        - Name: DeployApplication
+          ActionTypeId:
+            Category: Deploy
+            Owner: AWS
+            Provider: ElasticBeanstalk
+            Version: 1
+          Configuration:
+            ApplicationName: !Ref ApplicationName
+            EnvironmentName: !Join
+              - '-'
+              - - '!Ref ApplicationName'
+                - 'qa'
+          InputArtifacts:
+          - Name: Zip
+          RunOrder: 2
+
+      - Name: DeployPROD
+        Actions:
+        - Name: DeployEnvironment
+          ActionTypeId:
+            Category: Deploy
+            Owner: AWS
+            Provider: CloudFormation
+            Version: 1
+          Configuration:
+            ActionMode: CREATE_UPDATE
+            Capabilities: CAPABILITY_IAM
+            RoleArn: !Sub '${CloudFormationRole.Arn}'
+            StackName: !Join
+              - '-'
+              - - '!Ref ApplicationName'
+                - 'prod'
+            OutputFileName: 'infrastructure/output-environment-prod.json'
+            TemplateConfiguration: 'Zip::infrastructure/environment-prod.input.json'
+            TemplatePath: 'Zip::infrastructure/environment.yaml'
+          InputArtifacts:
+          - Name: Zip
+          OutputArtifacts:
+          - Name: Prod
+          RunOrder: 1
+
+        - Name: DeployApplication
+          ActionTypeId:
+            Category: Deploy
+            Owner: AWS
+            Provider: ElasticBeanstalk
+            Version: 1
+          Configuration:
+            ApplicationName: !Ref ApplicationName
+            EnvironmentName: !Join
+              - '-'
+              - - '!Ref ApplicationName'
+                - 'prod'
+          InputArtifacts:
+          - Name: Zip
+          RunOrder: 2
