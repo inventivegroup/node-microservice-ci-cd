@@ -2,7 +2,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'Application'
 Parameters:
-  Name:
+  ApplicationName:
     Type: String
     Default: example-ci-cd
   ArtifactsBucketName:
@@ -13,4 +13,4 @@ Resources:
   Application:
     Type: 'AWS::ElasticBeanstalk::Application'
     Properties:
-      ApplicationName: !Ref Name
+      ApplicationName: !Ref ApplicationName

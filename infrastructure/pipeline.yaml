@@ -152,6 +152,7 @@ Resources:
             StackName: 'aftp-application'
             TemplateConfiguration: 'Zip::infrastructure/application.input.json'
             TemplatePath: 'Zip::infrastructure/application.yaml'
+            ParameterOverrides: !Sub '{"ApplicationName": "${ApplicationName}"}'
           InputArtifacts:
           - Name: Zip
           RunOrder: 1
@@ -170,7 +171,7 @@ Resources:
             RoleArn: !Sub '${CloudFormationRole.Arn}'
             StackName: !Join
               - '-'
-              - - '!Ref ApplicationName'
+              - - !Ref ApplicationName
                 - 'qa'
             OutputFileName: 'infrastructure/output-environment-qa.json'
             TemplateConfiguration: 'Zip::infrastructure/environment-qa.input.json'
@@ -191,7 +192,7 @@ Resources:
             ApplicationName: !Ref ApplicationName
             EnvironmentName: !Join
               - '-'
-              - - '!Ref ApplicationName'
+              - - !Ref ApplicationName
                 - 'qa'
           InputArtifacts:
           - Name: Zip
@@ -211,7 +212,7 @@ Resources:
             RoleArn: !Sub '${CloudFormationRole.Arn}'
             StackName: !Join
               - '-'
-              - - '!Ref ApplicationName'
+              - - !Ref ApplicationName
                 - 'prod'
             OutputFileName: 'infrastructure/output-environment-prod.json'
             TemplateConfiguration: 'Zip::infrastructure/environment-prod.input.json'
@@ -232,7 +233,7 @@ Resources:
             ApplicationName: !Ref ApplicationName
             EnvironmentName: !Join
               - '-'
-              - - '!Ref ApplicationName'
+              - - !Ref ApplicationName
                 - 'prod'
           InputArtifacts:
           - Name: Zip
