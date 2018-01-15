@@ -3,15 +3,15 @@ FROM node:8
 LABEL maintainer="Inventive Group Inc."
 
 # Create app directory
-RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-COPY ./src /usr/src/app/src
-
 # Install app dependencies
-COPY package.json /usr/src/app/
-RUN npm install --production
+COPY package*.json ./
+
+RUN npm install --only=production
+
+COPY ./src ./src
 
 EXPOSE 8080
 
-CMD [ "node", "src/server.js" ]
+CMD [ "npm", "start" ]
