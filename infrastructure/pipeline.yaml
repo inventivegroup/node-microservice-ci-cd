@@ -149,7 +149,10 @@ Resources:
             ActionMode: CREATE_UPDATE
             Capabilities: CAPABILITY_IAM
             RoleArn: !Sub '${CloudFormationRole.Arn}'
-            StackName: 'aftp-application'
+              StackName: !Join
+              - '-'
+              - - !Ref ApplicationName
+                - 'application'
             TemplateConfiguration: 'Zip::infrastructure/application.input.json'
             TemplatePath: 'Zip::infrastructure/application.yaml'
             ParameterOverrides: !Sub '{"ApplicationName": "${ApplicationName}"}'

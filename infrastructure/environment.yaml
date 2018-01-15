@@ -33,7 +33,7 @@ Resources:
     Properties:
       ApplicationName: !Ref ApplicationName
       EnvironmentName: !Sub '${ApplicationName}-${Stage}'
-      SolutionStackName: '64bit Amazon Linux 2016.09 v2.2.0 running PHP 7.0'
+      SolutionStackName: '64bit Amazon Linux 2017.09 v2.8.3 running Docker 17.06.2-ce'
       OptionSettings:
       - Namespace: 'aws:autoscaling:launchconfiguration'
         OptionName: 'IamInstanceProfile'
