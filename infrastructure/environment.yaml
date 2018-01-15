@@ -4,7 +4,6 @@ Description: 'Environment'
 Parameters:
   ApplicationName:
     Type: String
-    Default: example-ci-cd
   Stage:
     Type: String
     AllowedValues:

@@ -179,6 +179,7 @@ Resources:
             OutputFileName: 'infrastructure/output-environment-qa.json'
             TemplateConfiguration: 'Zip::infrastructure/environment-qa.input.json'
             TemplatePath: 'Zip::infrastructure/environment.yaml'
+            ParameterOverrides: !Sub '{"ApplicationName": "${ApplicationName}"}'
           InputArtifacts:
           - Name: Zip
           OutputArtifacts:
@@ -220,6 +221,7 @@ Resources:
             OutputFileName: 'infrastructure/output-environment-prod.json'
             TemplateConfiguration: 'Zip::infrastructure/environment-prod.input.json'
             TemplatePath: 'Zip::infrastructure/environment.yaml'
+            ParameterOverrides: !Sub '{"ApplicationName": "${ApplicationName}"}'
           InputArtifacts:
           - Name: Zip
           OutputArtifacts:
