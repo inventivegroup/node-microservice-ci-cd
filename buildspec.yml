@@ -1,9 +1,5 @@
 version: 0.2
 
-env:
-  variables:
-    SOME_VAR: "cool environment variable"
-
 phases:
   install:
     commands:
@@ -12,21 +8,23 @@ phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - $(aws ecr get-login --region us-east-2 --no-include-email)
+      - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
+      - REPOSITORY_URI=$(aws sts get-caller-identity --output text --query 'Account').dkr.ecr.us-east-2.amazonaws.com/node-microservice-ci-cd    
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       
   build:
     commands:
       - echo Build started on `date`
-      - echo Building the Docker image...          
-      - docker build -t node-microservice-ci-cd .
-      - docker tag node-microservice-ci-cd:latest $(aws sts get-caller-identity --output text --query 'Account').dkr.ecr.us-east-2.amazonaws.com/node-microservice-ci-cd:latest      
+      - echo Building the Docker image...      
+      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
 
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
-      - docker push $(aws sts get-caller-identity --output text --query 'Account').dkr.ecr.us-east-2.amazonaws.com/node-microservice-ci-cd:latest
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - echo Writing image definitions file...
+      - printf '[{"name":"node-microservice-ci-cd","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
 
 artifacts:
-  files:
-    - '**/*'
+  files: imagedefinitions.json

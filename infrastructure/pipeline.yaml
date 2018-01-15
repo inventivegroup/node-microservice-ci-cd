@@ -116,7 +116,7 @@ Resources:
             RoleArn: !Sub '${CloudFormationRole.Arn}'
             StackName: !Ref ApplicationName
             TemplatePath: 'Zip::infrastructure/pipeline.yaml'
-            ParameterOverrides: !Sub '{"GitHubUserName": "${GitHubUserName}", "GitHubOAuthToken": "${GitHubOAuthToken}"}'
+            ParameterOverrides: !Sub '{"ApplicationName": "${ApplicationName}", "GitHubUserName": "${GitHubUserName}", "GitHubOAuthToken": "${GitHubOAuthToken}"}'
           InputArtifacts:
           - Name: Zip
           RunOrder: 1
@@ -134,7 +134,7 @@ Resources:
           InputArtifacts:
           - Name: Zip
           OutputArtifacts:
-          - Name: Build
+          - Name: ImageDefinitions
           RunOrder: 1
 
       - Name: DeployApplication
