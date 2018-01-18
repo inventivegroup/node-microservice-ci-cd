@@ -15,7 +15,7 @@ APPLICATION_NAME=$(cat ../package.json \
 # get repository url from git
 REPO_URL=$(git config --get remote.origin.url)
 REPO_NAME=$(basename -s .git $REPO_URL)
-AWS_REGION="us-west-2"
+AWS_REGION="us-east-2"
 REPO_OWNER="inventivegroup"
 
 read -p "Enter AWS region to deploy to (default ${AWS_REGION}): " AWS_REGION_READ
