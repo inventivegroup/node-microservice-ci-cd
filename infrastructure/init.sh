@@ -38,7 +38,7 @@ echo ""
 aws --region ${AWS_REGION} cloudformation create-stack \
   --stack-name $APPLICATION_NAME \
   --template-body file://pipeline.yaml \
-  --capabilities CAPABILITY_IAM
+  --capabilities CAPABILITY_IAM \
   --parameters \
     "ParameterKey=ApplicationName,ParameterValue=${APPLICATION_NAME}" \
     "ParameterKey=GithubRepoName,ParameterValue=${REPO_NAME}" \
