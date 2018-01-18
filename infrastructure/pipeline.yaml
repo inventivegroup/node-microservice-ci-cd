@@ -4,8 +4,9 @@ Description: 'Pipeline'
 Parameters:
   ApplicationName:
     Type: String
-    Default: node-microservice-ci-cd
-  GitHubUserName:
+  GithubRepoName:
+    Type: String
+  GitHubRepoOwner:
     Type: String
   GitHubOAuthToken:
     Type: String
@@ -94,8 +95,8 @@ Resources:
             Provider: GitHub
             Version: 1
           Configuration:
-            Owner: !Ref GitHubUserName
-            Repo: !Ref ApplicationName
+            Owner: !Ref GitHubRepoOwner
+            Repo: !Ref GithubRepoName
             Branch: master
             OAuthToken: !Ref GitHubOAuthToken
           OutputArtifacts:
@@ -116,7 +117,7 @@ Resources:
             RoleArn: !Sub '${CloudFormationRole.Arn}'
             StackName: !Ref ApplicationName
             TemplatePath: 'Zip::infrastructure/pipeline.yaml'
-            ParameterOverrides: !Sub '{"ApplicationName": "${ApplicationName}", "GitHubUserName": "${GitHubUserName}", "GitHubOAuthToken": "${GitHubOAuthToken}"}'
+            ParameterOverrides: !Sub '{"ApplicationName": "${ApplicationName}", "GithubRepoName": "${GithubRepoName}", "GitHubRepoOwner": "${GitHubRepoOwner}", "GitHubOAuthToken": "${GitHubOAuthToken}"}'
           InputArtifacts:
           - Name: Zip
           RunOrder: 1
