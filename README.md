@@ -22,6 +22,17 @@ This will setup a CodePipeline to:
 * create/update a production ElasticBeanstalk environment
 * deploy a new application version to the production environment
 
+## Assumptions
+### Docker Image Uploading
+By default this will attempt to upload the docker image to `<account_id>.dkr.ecr.us-east-2.amazonaws.com/node-microservice-ci-cd`.
+
+To change this, you can change the `buildspec.yml` file's `REPOSITORY_URI` environment variable.
+
+### Secret Management 
+This will use AWS SSM to store the database passwords. By default it will look for a `example-ci-cd-db-password-qa` and `example-ci-cd-db-password-prod` parameter for their respective environments. 
+
+To change this, you can change the `environment-qa.input.json` and `environment-prod.input.json` files. 
+
 ## Cleanup
 
 To delete all AWS resources, remove the CloudFormation stacks in the following order:

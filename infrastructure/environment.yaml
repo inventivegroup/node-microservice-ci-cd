@@ -9,6 +9,43 @@ Parameters:
     AllowedValues:
     - prod
     - qa
+  InstanceType:
+    Description: Instance Type for Application
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.nano
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+  DatabaseUser:
+    Default: admin
+    NoEcho: 'true'
+    Type: String
+    Description: Database admin account name
+    MinLength: '1'
+    MaxLength: '16'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
+  DatabasePasswordSSMParamName:
+    Type : 'AWS::SSM::Parameter::Value<String>'
+    Default: example-ci-cd-db-password-qa
+    NoEcho: 'true'
+    Description: Database admin account password
+    MinLength: '1'
+    MaxLength: '41'
+    AllowedPattern: '[a-zA-Z0-9]*'
+    ConstraintDescription: must contain only alphanumeric characters.
+  DBInstanceType:
+    Description: Instance Type for Database
+    Type: String
+    Default: db.t2.micro
+    AllowedValues:
+      - db.t2.micro
+      - db.m1.small
+      - db.m1.medium
+      - db.m1.large
 Resources:
   Role:
     Type: 'AWS::IAM::Role'
@@ -27,6 +64,35 @@ Resources:
     Properties:
       Roles:
       - !Ref Role
+  InstanceSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: RDS allows ingress from EC2 instances in this group.
+      SecurityGroupIngress: []
+  DBEC2SecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Open database for access
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '3306'
+          ToPort: '3306'
+          SourceSecurityGroupId: !GetAtt 
+            - InstanceSecurityGroup
+            - GroupId
+  Database:
+    Type: 'AWS::RDS::DBInstance'
+    Properties:
+      Engine: MySQL
+      DBName: !Ref ApplicationName
+      MasterUsername: !Ref DatabaseUser
+      DBInstanceClass: !Ref DBInstanceType
+      VPCSecurityGroups:
+        - !GetAtt 
+          - DBEC2SecurityGroup
+          - GroupId
+      AllocatedStorage: '5'
+      MasterUserPassword: !Ref DatabasePasswordSSMParamName
   Environment:
     Type: 'AWS::ElasticBeanstalk::Environment'
     Properties:
@@ -37,6 +103,12 @@ Resources:
       - Namespace: 'aws:autoscaling:launchconfiguration'
         OptionName: 'IamInstanceProfile'
         Value: !Ref InstanceProfile
+      - Namespace: 'aws:autoscaling:launchconfiguration'
+        OptionName: InstanceType
+        Value: !Ref InstanceType
+      - Namespace: 'aws:autoscaling:launchconfiguration'
+        OptionName: SecurityGroups
+        Value: !Ref InstanceSecurityGroup
 Outputs:
   EnvironmentName:
     Value: !Ref Environment

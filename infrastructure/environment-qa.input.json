@@ -1,5 +1,6 @@
 {
   "Parameters": {
-    "Stage": "qa"
+    "Stage": "qa",
+    "DatabasePasswordSSMParamName": "example-ci-cd-db-password-qa"
   }
 }
