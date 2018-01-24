@@ -4,6 +4,10 @@ Description: 'Environment'
 Parameters:
   ApplicationName:
     Type: String
+  DatabaseName:
+    Type: String
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
   Stage:
     Type: String
     AllowedValues:
@@ -78,7 +82,7 @@ Resources:
     Type: 'AWS::RDS::DBInstance'
     Properties:
       Engine: MySQL
-      DBName: !Ref ApplicationName
+      DBName: !Ref DatabaseName
       MasterUsername: !Ref DatabaseUser
       DBInstanceClass: !Ref DBInstanceType
       VPCSecurityGroups:
