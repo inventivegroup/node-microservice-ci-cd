@@ -1,7 +1,7 @@
 {
   "Parameters": {
     "Stage": "qa",
-    "DatabaseName": "nodeMicroserviceCICD-qa",
+    "DatabaseName": "nodeMicroserviceQA",
     "DatabasePasswordSSMParamName": "example-ci-cd-db-password-qa"
   }
 }

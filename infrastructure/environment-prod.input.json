@@ -1,7 +1,7 @@
 {
   "Parameters": {
     "Stage": "prod",
-    "DatabaseName": "nodeMicroserviceCICD-prod",
+    "DatabaseName": "nodeMicroservicePROD",
     "DatabasePasswordSSMParamName": "example-ci-cd-db-password-prod"
   }
 }
